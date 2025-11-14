@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Xeal-like Student Table</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">X</div>
+      <div class="brand-text">
+        <h1>Xeal &nbsp; Student Hub</h1>
+        <small>Simple • Clean • Secure</small>
+      </div>
+    </div>
+
+    <div class="login">
+      <input id="studentID" placeholder="Enter Your Student ID" />
+      <button id="setIdBtn">Set ID</button>
+      <span id="currentUser" class="muted"></span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card add-card">
+      <h2>Add Student Record</h2>
+      <div class="inputs">
+        <input id="si" placeholder="SI No" />
+        <input id="id" placeholder="Student ID" />
+        <input id="name" placeholder="Name" />
+        <input id="topic" placeholder="Topic" />
+        <button id="addBtn" class="btn-primary">Add</button>
+      </div>
+      <p class="hint">Login with your Student ID (top-right) before adding/editing. Only the owner can edit/delete their record.</p>
+    </section>
+
+    <section class="card table-card">
+      <div class="table-header">
+        <h2>Records</h2>
+        <div class="table-actions">
+          <input id="search" placeholder="Search by name / topic / id" />
+          <button id="clearAll" class="btn-ghost">Clear All (Local)</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>SI No</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Topic</th>
+              <th>Referenced?</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <p class="muted small">Reference = can't be deleted. Only owner can edit. Data stored locally in your browser.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <small>Made Xeal-style • LocalStorage demo • © Student Hub</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
