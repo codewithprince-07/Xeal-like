@@ -31,55 +31,74 @@ setIdBtn.addEventListener("click", () => {
   updateCurrentUserDisplay();
 });
 
-// add new record
+// add new record (Auto SI + Auto Student ID)
 addBtn.addEventListener("click", () => {
-  if (!currentUser) { alert("Please set your Student ID at top first."); return; }
+  if (!currentUser) { 
+    alert("Please set your Student ID at top first."); 
+    return; 
+  }
 
-  const si = siInput.value.trim();
-  const sid = idInput.value.trim();
   const name = nameInput.value.trim();
   const topic = topicInput.value.trim();
 
-  if (!si || !sid || !name || !topic) { alert("Fill all fields."); return; }
+  if (!name || !topic) { 
+    alert("Fill Name & Topic."); 
+    return; 
+  }
+
+  // AUTO SERIAL NO.
+  const si = dataList.length + 1;
+
+  // AUTO ID LIKE STU-1, STU-2
+  const sid = "STU-" + si;
 
   const obj = {
-    si, id: sid, name, topic,
-    ownerID: currentUser,   // owner lock
+    si,
+    id: sid,
+    name,
+    topic,
+    ownerID: currentUser,  // owner lock
     referenced: false,
     createdAt: Date.now()
   };
 
   dataList.push(obj);
   saveAndRender();
-  siInput.value = idInput.value = nameInput.value = topicInput.value = "";
+
+  // clear inputs
+  nameInput.value = topicInput.value = "";
 });
 
 // search
-searchInput.addEventListener("input", () => renderTable(searchInput.value.trim().toLowerCase()));
+searchInput.addEventListener("input", () =>
+  renderTable(searchInput.value.trim().toLowerCase())
+);
 
-// clear all (local)
+// clear all
 clearAllBtn.addEventListener("click", () => {
-  if (!confirm("Clear all local records? This will remove all data from this browser.")) return;
+  if (!confirm("Clear all local records?")) return;
   dataList = [];
   saveAndRender();
 });
 
 // helpers
-function saveAndRender(){
+function saveAndRender() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(dataList));
   renderTable();
 }
 
-function updateCurrentUserDisplay(){
-  currentUserSpan.textContent = currentUser ? `Logged in: ${currentUser}` : "";
+function updateCurrentUserDisplay() {
+  currentUserSpan.textContent =
+    currentUser ? `Logged in: ${currentUser}` : "";
 }
 
-// render with optional filter
-function renderTable(filter=""){
+// render table
+function renderTable(filter = "") {
   tableBody.innerHTML = "";
-  const list = dataList.slice().sort((a,b)=> a.si - b.si);
 
-  list.forEach((item, idx) => {
+  const list = dataList.slice().sort((a, b) => a.si - b.si);
+
+  list.forEach((item) => {
     if (filter) {
       const combined = `${item.name} ${item.topic} ${item.id}`.toLowerCase();
       if (!combined.includes(filter)) return;
@@ -98,7 +117,7 @@ function renderTable(filter=""){
 
     const actionsTd = tr.querySelector("td:last-child");
 
-    // Reference button (anyone can reference)
+    // Reference toggle
     const refBtn = document.createElement("button");
     refBtn.className = "action-btn ref";
     refBtn.textContent = item.referenced ? "Unreference" : "Reference";
@@ -108,47 +127,46 @@ function renderTable(filter=""){
     });
     actionsTd.appendChild(refBtn);
 
-    // Edit button (only owner)
+    // Edit button (Owner Only — SI & ID cannot be changed)
     const editBtn = document.createElement("button");
     editBtn.className = "action-btn edit";
     editBtn.textContent = "Edit";
-    editBtn.title = "Only owner can edit";
     editBtn.addEventListener("click", () => {
-      if (!currentUser) { alert("Set your Student ID first."); return; }
-      if (item.ownerID !== currentUser) { alert("You cannot edit another person's data."); return; }
+      if (!currentUser) return alert("Set your Student ID.");
+      if (item.ownerID !== currentUser)
+        return alert("You cannot edit another person's data.");
 
-      // inline edit modal (prompt for fields)
-      const newSi = prompt("SI No:", item.si);
-      if (newSi === null) return;
-      const newId = prompt("ID:", item.id);
-      if (newId === null) return;
+      // Only Name + Topic editable
       const newName = prompt("Name:", item.name);
       if (newName === null) return;
+
       const newTopic = prompt("Topic:", item.topic);
       if (newTopic === null) return;
 
-      item.si = newSi.trim();
-      item.id = newId.trim();
       item.name = newName.trim();
       item.topic = newTopic.trim();
+
       saveAndRender();
     });
     actionsTd.appendChild(editBtn);
 
-    // Delete button (only owner and only if not referenced)
+    // Delete button (Owner + Not Referenced)
     const delBtn = document.createElement("button");
     delBtn.className = "action-btn delete";
     delBtn.textContent = "Delete";
-    delBtn.title = "Only owner can delete; can't delete if Referenced";
     delBtn.addEventListener("click", () => {
-      if (!currentUser) { alert("Set your Student ID first."); return; }
-      if (item.ownerID !== currentUser) { alert("You cannot delete another person's data."); return; }
-      if (item.referenced) { alert("This record is referenced and cannot be deleted."); return; }
+      if (!currentUser) return alert("Set your Student ID.");
+      if (item.ownerID !== currentUser)
+        return alert("You cannot delete another person's data.");
+      if (item.referenced)
+        return alert("This record is referenced & cannot be deleted.");
 
       if (!confirm("Delete this record?")) return;
-      // remove by identity (safe)
-      const i = dataList.findIndex(d => d.createdAt === item.createdAt);
-      if (i >= 0) dataList.splice(i,1);
+
+      const i = dataList.findIndex(
+        (d) => d.createdAt === item.createdAt
+      );
+      if (i >= 0) dataList.splice(i, 1);
       saveAndRender();
     });
     actionsTd.appendChild(delBtn);
@@ -159,12 +177,13 @@ function renderTable(filter=""){
   updateCurrentUserDisplay();
 }
 
-// small helper to avoid XSS (since using prompt / innerHTML)
-function escapeHtml(text){
+// HTML escape
+function escapeHtml(text) {
   return String(text)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
+
